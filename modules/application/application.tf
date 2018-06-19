@@ -29,14 +29,14 @@ resource "aws_security_group" "allow_http" {
 }
 
 # AMI data source to fetch AMI
-data "aws_ami" "app-ami" {
-  most_recent = true     # My own most recent AMI
-  owners      = ["self"]
+data "aws_ami" "centos" {
+  most_recent = true             # My own most recent AMI
+  owners      = ["679593333241"]
 }
 
 # EC2
 resource "aws_instance" "app-server" {
-  ami                    = "${data.aws_ami.app-ami.id}"
+  ami                    = "${data.aws_ami.centos.id}"
   instance_type          = "${lookup(var.instance_type, var.environment)}"
   subnet_id              = "${var.subnet_id}"
   vpc_security_group_ids = ["${distinct(concat(var.extra_sgs, aws_security_group.allow_http.*.id))}"] # Join multiple lists, without duplicates
