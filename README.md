@@ -139,3 +139,15 @@ terraform plan -var 'allow_ssh_access=["52.123.123.123/32"]'
 ```bash
 terraform plan -var 'subnet_cidrs={public="172.0.16.0/24", private="172.0.17.0/24"}'
 ```
+
+## Environment variables
+
+* Automatically reads all ENV with `TF_VAR_*` prefix, e.g. `TF_VAR_region=ap-southeast-2 terraform plan`
+
+* Source the vars file, e.g. `source vars.txt; terraform plan`
+
+## Variable files
+
+```bash
+terraform plan -var-file=./development.tfvars
+```
