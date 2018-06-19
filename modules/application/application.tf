@@ -30,7 +30,7 @@ resource "aws_security_group" "allow_http" {
 
 # AMI data source to fetch AMI
 data "aws_ami" "centos" {
-  most_recent = true             # My own most recent AMI
+  most_recent = true             # CentOS most recent AMI
   owners      = ["679593333241"]
 }
 
