@@ -20,8 +20,9 @@ resource "aws_subnet" "public" {
 
 # Application 1
 module "mighty_trousers" {
-  source    = "./modules/application"
-  vpc_id    = "${aws_vpc.my_vpc.id}"
-  subnet_id = "${aws_subnet.public.id}"
-  name      = "MightyTrousers {module.mighty_trousers.hostname}"
+  source      = "./modules/application"
+  vpc_id      = "${aws_vpc.my_vpc.id}"
+  subnet_id   = "${aws_subnet.public.id}"
+  name        = "MightyTrousers"
+  environment = "${var.environment}"
 }

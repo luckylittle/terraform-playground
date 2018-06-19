@@ -27,8 +27,8 @@ resource "aws_security_group" "allow_http" {
 
 # EC2
 resource "aws_instance" "app-server" {
-  ami                    = "ami-9bf712f4"
-  instance_type          = "t2.micro"
+  ami                    = "ami-9bf712f4"                                  #CentOS in Frankfurt
+  instance_type          = "${lookup(var.instance_type, var.environment)}"
   subnet_id              = "${var.subnet_id}"
   vpc_security_group_ids = ["${aws_security_group.allow_http.id}"]
 
