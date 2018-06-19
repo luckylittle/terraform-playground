@@ -170,23 +170,6 @@ resource "aws_vpc_peering_connection" "my_vpc-management" {
 }
 ```
 
-* template_file
-
-```
-data "template_file" "user_data" {
-  template = "${file("${path.module}/user_data.sh.tpl")}"
-
-  vars {
-    packages   = "${var.extra_packages}"
-    nameserver = "${var.external_nameserver}"
-  }
-}
-```
-
-```bash
-terraform init # Download template provider v1.0 or higher
-```
-
 * external_file
 
 Key pair:
@@ -206,4 +189,21 @@ resource "aws_iam_role_policy" "s3-assets-all" {
     role   = "${aws_iam_role.app-production.id}"
     policy = "${file("policies/s3=assets@all.json")}" # Tip! Naming scheme i am using is ${SERVICE}=${RESOURCE}@${ACTION}
 }
+```
+
+* template_file
+
+```
+data "template_file" "user_data" {
+  template = "${file("${path.module}/user_data.sh.tpl")}"
+
+  vars {
+    packages   = "${var.extra_packages}"
+    nameserver = "${var.external_nameserver}"
+  }
+}
+```
+
+```bash
+terraform init # Download template provider v1.0 or higher
 ```
