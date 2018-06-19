@@ -1,12 +1,4 @@
-# Variables
-variable "vpc_id" {}
-
-variable "subnet_id" {}
-
-variable "name" {}
-
-variable "key_pair" {}
-
+## Resources
 # SG
 resource "aws_security_group" "allow_http" {
   name        = "${var.name} allow_http"
@@ -41,12 +33,26 @@ resource "aws_instance" "app-server" {
   subnet_id              = "${var.subnet_id}"
   vpc_security_group_ids = ["${distinct(concat(var.extra_sgs, aws_security_group.allow_http.*.id))}"] # Join multiple lists, without duplicates
   key_name               = "${var.key_pair}"
+  user_data              = "${data.template_file.user_data.rendered}"
 
   tags {
     Name = "${var.name}"
+  }
+
+  lifecycle {
+    ignore_changes = ["user_data"] # Changing user_data normally leads to resource recreation
   }
 }
 
 output "hostname" {
   value = "${aws_instance.app-server.private_dns}"
+}
+
+data "template_file" "user_data" {
+  template = "${file("${path.module}/user_data.sh.tpl")}"
+
+  vars {
+    packages   = "${var.extra_packages}"
+    nameserver = "${var.external_nameserver}"
+  }
 }

@@ -41,11 +41,13 @@ resource "aws_key_pair" "terraform" {
 
 # Application 1
 module "mighty_trousers" {
-  source      = "./modules/application"
-  vpc_id      = "${aws_vpc.my_vpc.id}"
-  subnet_id   = "${aws_subnet.public.id}"
-  name        = "MightyTrousers"
-  environment = "${var.environment}"
-  extra_sgs   = ["${aws_security_group.default.id}"]
-  key_pair    = "${aws_key_pair.terraform.key_name}"
+  source              = "./modules/application"
+  vpc_id              = "${aws_vpc.my_vpc.id}"
+  subnet_id           = "${aws_subnet.public.id}"
+  name                = "MightyTrousers"
+  environment         = "${var.environment}"
+  extra_sgs           = ["${aws_security_group.default.id}"]
+  key_pair            = "${aws_key_pair.terraform.key_name}"
+  extra_packages      = "${lookup(var.extra_packages, "my_app", "base")}"
+  external_nameserver = "${var.external_nameserver}"
 }
