@@ -1,6 +1,6 @@
 # HashiCorp Terraform playground
 
-Using root module outputs:
+## Using root module outputs
 
 ```bash
 terraform get -update   # Create symlink from the module to the .terraform folder
@@ -10,7 +10,7 @@ terraform apply         # Full run
 terraform output        # See the output
 ```
 
-Using maps:
+## Using maps
 
 ```
 terraform plan
@@ -108,3 +108,18 @@ Terraform will perform the following actions:
 ```
 
 Note: It creates t2.large instance (`./variables.tf` = *dev* versus `./modules/application/variables.tf` = *prod*).
+
+## Using lists
+
+`aws_security_group_allow_http.*.id` is essentially the same as:
+
+`aws_security_group_allow_http.0.id`
+`aws_security_group_allow_http.1.id`
+`...`
+`aws_security_group_allow_http.N.id`
+
+To play with different interpolation functions interactively:
+
+```bash
+terraform console
+```
