@@ -151,3 +151,25 @@ terraform plan -var 'subnet_cidrs={public="172.0.16.0/24", private="172.0.17.0/2
 ```bash
 terraform plan -var-file=./development.tfvars
 ```
+
+# Data sources
+
+It is often the case that some resources already exist and you don't have much control over them. You can still use them inside your Terraform teplates referenced with the `data` keyword.
+
+For example VPC peering between VPC created manually and VPC created in Terraform:
+
+```
+data "aws_vpc" "management_layer" {
+    id = "xxx-xxxxxxxx"
+}
+
+resource "aws_vpc_peering_connection" "my_vpc-management" {
+    peer_vpc_id = "${data.aws_vpc.management_layer.id}
+    vpc_id      = "${aws_vpc.my_vpc.id}"
+    auto_accept = true
+}
+```
+
+* template_file
+
+* external_file
