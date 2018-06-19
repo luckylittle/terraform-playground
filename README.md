@@ -118,8 +118,24 @@ Note: It creates t2.large instance (`./variables.tf` = *dev* versus `./modules/a
 `...`
 `aws_security_group_allow_http.N.id`
 
-To play with different interpolation functions interactively:
+To play with different interpolation functions interactively, use:
 
 ```bash
 terraform console
+```
+
+## Supplying variables inline
+
+```bash
+terraform plan -var 'environment=dev' -var 'key1=value' -var 'key2=value' ...
+```
+
+Note: It creates t2.micro instance.
+
+```bash
+terraform plan -var 'allow_ssh_access=["52.123.123.123/32"]'
+```
+
+```bash
+terraform plan -var 'subnet_cidrs={public="172.0.16.0/24", private="172.0.17.0/24"}'
 ```

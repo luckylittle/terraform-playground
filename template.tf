@@ -2,20 +2,21 @@
 
 # AWS Frankfurt
 provider "aws" {
-  region                  = "${var.region}"
+  region                  = "${var.region}"      # From ./variables.tf
   shared_credentials_file = "~/.aws/credentials"
-  profile                 = "cloudawsexam"
+  profile                 = "cloudawsexam"       # My AWS profile name
 }
 
+## Resources
 # VPC
 resource "aws_vpc" "my_vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "${var.vpc_cidr}"
 }
 
 # Subnet
 resource "aws_subnet" "public" {
   vpc_id     = "${aws_vpc.my_vpc.id}"
-  cidr_block = "10.0.1.0/24"
+  cidr_block = "${lookup(var.subnet_cidrs, "public")}"
 }
 
 # Default SG
@@ -28,7 +29,7 @@ resource "aws_security_group" "default" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${var.allow_ssh_access}"]
   }
 }
 
