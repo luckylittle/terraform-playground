@@ -33,6 +33,12 @@ resource "aws_security_group" "default" {
   }
 }
 
+# Key pair
+resource "aws_key_pair" "terraform" {
+  key_name   = "terraform"
+  public_key = "${file("~/.ssh/id_rsa.pub")}"
+}
+
 # Application 1
 module "mighty_trousers" {
   source      = "./modules/application"
@@ -41,4 +47,5 @@ module "mighty_trousers" {
   name        = "MightyTrousers"
   environment = "${var.environment}"
   extra_sgs   = ["${aws_security_group.default.id}"]
+  key_pair    = "${aws_key_pair.terraform.key_name}"
 }

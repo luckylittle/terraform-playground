@@ -2,7 +2,10 @@
 variable "vpc_id" {}
 
 variable "subnet_id" {}
+
 variable "name" {}
+
+variable "key_pair" {}
 
 # SG
 resource "aws_security_group" "allow_http" {
@@ -27,7 +30,7 @@ resource "aws_security_group" "allow_http" {
 
 # AMI data source to fetch AMI
 data "aws_ami" "app-ami" {
-  most_recent = true
+  most_recent = true     # My own most recent AMI
   owners      = ["self"]
 }
 
@@ -37,6 +40,7 @@ resource "aws_instance" "app-server" {
   instance_type          = "${lookup(var.instance_type, var.environment)}"
   subnet_id              = "${var.subnet_id}"
   vpc_security_group_ids = ["${distinct(concat(var.extra_sgs, aws_security_group.allow_http.*.id))}"] # Join multiple lists, without duplicates
+  key_name               = "${var.key_pair}"
 
   tags {
     Name = "${var.name}"

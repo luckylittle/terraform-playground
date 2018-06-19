@@ -172,4 +172,27 @@ resource "aws_vpc_peering_connection" "my_vpc-management" {
 
 * template_file
 
+```
+
+```
+
 * external_file
+
+Key pair:
+
+```
+resource "aws_key_pair" "terraform" {
+    key_name   = "terraform"
+    public_key = "${file("~/.ssh/id_rsa.pub")}"
+}
+```
+
+IAM policy:
+
+```
+resource "aws_iam_role_policy" "s3-assets-all" {
+    name   = "s3=assets@all"
+    role   = "${aws_iam_role.app-production.id}"
+    policy = "${file("policies/s3=assets@all.json")}" # Tip! Naming scheme i am using is ${SERVICE}=${RESOURCE}@${ACTION}
+}
+```
