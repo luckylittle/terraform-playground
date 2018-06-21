@@ -207,3 +207,64 @@ data "template_file" "user_data" {
 ```bash
 terraform init # Download template provider v1.0 or higher
 ```
+
+* Randomization & shuffle
+
+Complete random hostnames generator example:
+
+```
+resource "random_shuffle" "hostname_creature" {
+    input = ["griffin", "gargoyle", "dragon"]
+    result_count = 1
+}
+
+resource "random_id" "hostname_random" {
+    byte_length = 4
+}
+
+data "template_file" "user_data" {
+    template = "${file("${path.module}/user_data.sh.tpl")}"
+}
+    vars {
+        packages   = "${var.extra_packages}"
+        nameserver = "${var.external_nameserver}"
+        hostname   = "${random_shuffle.hostname_creature.result[0]}${random_id.hostname.b64}"
+    }
+```
+
+AMI ID keepers:
+
+```
+resource "random_id" "hostname" {
+    keepers { # When value of one of the key is changed, random value is generated
+        ami_id = "${data.aws_ami.app-ami.id}"
+    }
+    byte_length = 4
+}
+```
+
+TLS - generate public/private key:
+
+```
+resource "tls_private_key" "example" {
+    algorithm   = "ECDSA"
+    ecdsa_curve = "P384"
+}
+```
+
+HashiCorp Consul:
+
+```
+provider "consul" {
+    address    = "consul.example.com:80"
+    datacenter = "frankfurt"
+}
+
+data "consul_keys" "amis" {
+    # Read the launch AMI from Consul
+    key {
+        name = "mighty_trouser"
+        path = "ami"
+    }
+}
+```
