@@ -152,7 +152,7 @@ terraform plan -var 'subnet_cidrs={public="172.0.16.0/24", private="172.0.17.0/2
 terraform plan -var-file=./development.tfvars
 ```
 
-# Data sources
+## Data sources
 
 It is often the case that some resources already exist and you don't have much control over them. You can still use them inside your Terraform teplates referenced with the `data` keyword.
 
@@ -265,6 +265,86 @@ data "consul_keys" "amis" {
     key {
         name = "mighty_trouser"
         path = "ami"
+    }
+}
+```
+
+## Provisioners
+
+Configuration blocks to perform actions AFTER the resource has been created:
+
+* local-exec
+
+Command of provisioner is executed relative to the folder you're running Terraform from.
+
+Runs only once, after resource creation.
+
+None of the updates will re-trigger provisioning, use `terraform taint` to recreate only specific resource.
+
+For example - Adding EC2 public IP to the Ansible inventory:
+
+```
+resource "aws_instance" ...
+...
+    provisioner "local-exec" {
+        command = "echo ${self.public_ip} >> inventory"
+    }
+```
+
+* remote-exec
+
+For example - Remotely install Puppet on the resource
+
+```
+...
+    provisioner "remote-exec" {
+        connection {
+            user        = "centos"
+            private_key = "${file("/home/lmaly/.ssh/id_rsa")}"
+        }
+        inline = [
+            "sudo rpm -ivh http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm"
+            "sudo yum install puppet -y"
+        ]
+    }
+```
+
+* file
+
+For example - Upload a Puppet manifest to the resource
+
+```
+...
+    provisioner "file" {
+        source      = "${path.module}/setup.pp"
+        destination = "/tmp/setup.pp" 
+    }
+```
+
+## null_resource
+
+Container for provisioners.
+
+`triggers` in the following example allows you to specify when to recreate `null_resource`:
+
+```
+resource "aws_instance" "app-server" {
+    ...
+}
+
+resource "null_resource" "app_server_provisioner" {
+    triggers {
+        server_id = "${aws_instance.app-server.id}"
+    }
+    connection {
+        user = "centos"
+        host = "${aws_instance.app-server.public_ip}"
+    }
+    provisioner "file" {
+        ...
+    }
+    provisioner "remote-exec" {
+        ...
     }
 }
 ```
