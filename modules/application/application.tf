@@ -42,10 +42,12 @@ resource "aws_instance" "app-server" {
   lifecycle {
     ignore_changes = ["user_data"] # Changing user_data normally leads to resource recreation
   }
+
+  count = "${var.instance_count}"
 }
 
-output "hostname" {
-  value = "${aws_instance.app-server.private_dns}"
+output "public_ip" {
+  value = "${join(",", aws_instance.app-server.*.public_ip)}"
 }
 
 data "template_file" "user_data" {

@@ -352,3 +352,32 @@ resource "null_resource" "app_server_provisioner" {
 To force the run of the above provisioner:
 
 `terraform taint -module mighty_trousers null_resource.app_server_provisioner`
+
+## Count
+
+Add count to the application module (`./modules/application/variables.tf`):
+
+```
+...
+variable "instance_count" {
+    default = 0
+}
+```
+
+Use it in the module:
+
+```
+resource "aws_instance" "app-server" {
+    ...
+    count = "${var.instance_count}"
+}
+```
+
+And pass the variable to the module:
+
+```
+module "mighty_trouser" {
+    ...
+    instance_count = 2
+}
+```

@@ -50,4 +50,5 @@ module "mighty_trousers" {
   key_pair            = "${aws_key_pair.terraform.key_name}"
   extra_packages      = "${lookup(var.extra_packages, "my_app", "base")}"
   external_nameserver = "${var.external_nameserver}"
+  instance_count      = 2
 }
