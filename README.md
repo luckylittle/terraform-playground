@@ -381,3 +381,102 @@ module "mighty_trouser" {
     instance_count = 2
 }
 ```
+
+## Element
+
+Returns a single element from a list at the given index.
+
+If the index is greater than the number of elements, this function will wrap using a standard mod algorithm.
+
+This function only works on flat lists.
+
+Examples:
+
+`element(aws_subnet.foo.*.id, count.index)`
+
+`element(var.list_of_strings, 2)`
+
+## Conditionals
+
+Create load balancer only if there is more than one instance:
+
+```
+resource "aws_elb" "load-balancer" {
+    name = "application-load-balancer"
+    ...
+    instances = ["${aws_instance.app-server.*.id}"]
+    count = "${var.instance_count > 1 ? 1 : 0}"
+}
+```
+
+With the above block, if the `instance_count` is `1`, number of ELBs to create will be `0`
+
+If it's anything other than `1`, number of ELBs will be `1`
+
+The syntax is: `CONDITION ? TRUEVAL : FALSEVAL`
+
+## Rolling out AMI upgrades
+
+* Method #1
+
+```
+resource "aws_instance" "app-server" {
+    ami   = "${data.aws_ami.app-ami.id}"
+    ...
+    count = "${var.instance_count}"
+    lifecycle {
+        create_before_destroy = true
+    }
+}
+```
+
+* Method #2
+
+`terraform apply -target "module.mighty_trousers.aws_instance.app-server[0]"`
+`terraform apply -target "module.mighty_trousers.aws_instance.app-server[1]"`
+
+* Blue-green
+
+Create a new group of instances.
+e.g.
+
+`resource "aws_instance" "app-server-v2" ...`
+
+Switch traffic to the new group.
+e.g.
+
+```
+resource "aws_elb" {
+    ...
+    instances = ["${aws_instance.app-server-v2.*.id}"] ...
+
+resource "null_resource" {
+    ...
+    triggers {
+        server_id = "${join(",", aws_instance.app-server-v2.*.id)}" ...
+    connection {
+        host = "${element(aws_instance.app-server-v2.*.public_ip, count.index)}" ...
+    }
+    ...
+```
+
+Remove the old group. 
+e.g.
+
+`terraform state mv module.mighty_trousers.aws_instance.app-server-v2 module.mighty_trousers.aws_instance.app-server`
+`terraform plan`
+
+* Method #3
+
+`resource "aws_launch_configuration" "app-server" { ... }`
+
+```
+resource "aws_autoscaling_group" "app-server" {
+    ...
+    wait_for_elb_capacity = "${var.instance_count}"
+    ...
+    lifecycle {
+        create_before_destroy = true
+    }
+}
+```
