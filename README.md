@@ -503,3 +503,139 @@ resource "aws_nat_gateway" "imported_gateway" {
     depends_on    = ["aws_internet_gateway.gw"]
 }
 ```
+
+## TerraHelp + Git-Crypt for tfstate sharing
+
+1. [TerraHelp](https://github.com/opencredo/terrahelp)
+
+Encryption/decryption of Terraform state file(s) using Vault, e.g.:
+
+`terrahelp encrypt -file terraform.tfstate --simple-key <PASSWORD>`
+
+2. [git-crypt](https://github.com/AGWA/git-crypt)
+
+Pushing secrets to Git, e.g.:
+
+`git-crypt --help`
+
+`.gitattributes`:
+
+```
+*.tfstate filter=git-crypt diff=git-crypt
+*.tfstate.backup filter=git-crypt diff=git-crypt
+```
+
+`git-crypt init` in the root of Terraform repository
+
+`git-crypt export-key /path/to/secret/file`
+
+`git-crypt status -f`
+
+`git add .`
+
+`git commit -m <MESSAGE>`
+
+`git push`
+
+To decrypt, do this once - after that it will be automatic, e.g:
+
+`git-crypt unlock /path/to/secret/file`
+
+## Where else to store tfstate?
+
+* S3
+
+```bash
+terraform remote config \
+-backend=s3 \
+-backend-config="bucket=lmaly-terraform" \
+-backend-config="key=mighty_trousers/terraform.tfstate" \
+-backend-config="region=eu-central-1"
+```
+
+## Terraform OOPS
+
+* Data source capable of fetching outputs from remote state file(s)
+
+* Have a template, configured remote state file and then go back to MightyTrousers:
+
+```
+data "terraform_remote_state" "iam" {
+    backend = "s3"
+    config {
+        bucket = "lmaly-terraform"
+        key    = "iam/terraform.tfstate"
+        region = "eu-central-1"
+    }
+}
+```
+
+Pass it to the module:
+
+```
+module "mighty_trousers {
+    ...
+    iam_role = "${data.terraform_remote_state.iam.base-role-name}"
+    ...
+}
+```
+
+## Terragrunt
+
+* Locking state file(s), when mutliple people are doing `terraform apply` at the same time
+
+[Terragrunt](https://github.com/gruntwork-io/terragrunt/releases)
+
+`.terragrunt`:
+
+```
+lock = {
+    backend = "dynamodb"
+    config {
+        state_file_id = "mighty_trousers"
+    }
+}
+
+remote_state = {
+    backend = "s3"
+    config {
+        bucket = "lmaly-terraform"
+        key    = "mighty_trousers/terraform.tfstate"
+        region = "eu-central-1"
+    }
+}
+```
+
+Now use `terragrunt` command, e.g.:
+
+`terragrunt get`
+`terragrunt plan`
+`terragrunt apply`
+`terragrunt output`
+`terragrunt destroy`
+
+With Terragrunt, you can also acquire the lock manually, for a longer period of time:
+
+`terragrunt acquire-lock`
+`terragrunt release-lock`
+
+## TestKitchen
+
+[Kitchen.ci](https://kitchen.ci)
+
+`Gemfile`:
+
+```
+source 'https://rubygems.org'
+ruby '2.3.1'
+gem 'test-kitchen'
+gem 'kitchen-terraform'
+```
+
+`bundle install`
+
+When you run TestKitchen, it stores the Terraform state in local `.kitchen/kitchen-terraform/$KITCHEN_SUITE-$KITCHEN-PLATFORM/`
+
+To run the tests:
+
+`bundle exec kitchen test`

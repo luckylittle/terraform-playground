@@ -41,7 +41,7 @@ resource "aws_key_pair" "terraform" {
 
 # Application 1
 module "mighty_trousers" {
-  source              = "./modules/application"
+  source              = "./modules/application"                           # This can also be e.g. "git::https://gitlab.com/.../module.git?ref=v0.1"
   vpc_id              = "${aws_vpc.my_vpc.id}"
   subnet_id           = "${aws_subnet.public.id}"
   name                = "MightyTrousers"
