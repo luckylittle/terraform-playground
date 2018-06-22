@@ -480,3 +480,26 @@ resource "aws_autoscaling_group" "app-server" {
     }
 }
 ```
+
+## Update state file after the manual change
+
+`terraform refresh`
+
+## Importing resources created outside of Terraform
+
+`terraform import <RESOURCE>.<NAME> <ID>`
+
+e.g.
+`terraform import aws_nat_gateway.imported_gateway nat-01234567890abcdefg`
+
+* This will only add it to the state file, it does not generate/create configuration, so the next terraform plan will mark it for destruction.
+
+* Add something similar to your template:
+
+```
+resource "aws_nat_gateway" "imported_gateway" {
+    allocation_id = "eipalloc-1234abcd"
+    subnet_id     = "${aws_subnet.private-1.id}"
+    depends_on    = ["aws_internet_gateway.gw"]
+}
+```
