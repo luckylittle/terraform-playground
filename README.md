@@ -1,5 +1,28 @@
 # HashiCorp Terraform playground
 
+## Basics
+
+* CLI
+
+```bash
+terraform validate                          # Check if the template is fine
+terraform ftm                               # Format template based on best practices
+terraform state list                        # Lists all resources in the state file
+terraform show                              # Print a complete state in human readable format
+terraform state show path_to_resource       # Print details of one resource
+terraform graph | dot -Tpng > graph.png     # Export dependency graph, needs GraphViz
+terraform graph -verbose | dot -Tpng > graph.png # Also show destroyed resources
+```
+
+* Template(s)
+
+```
+depends_on              = accepted by any resource and accepts a list of resources to create explicit dependencies for
+ignore_changes          = allowing individual attributes to be ignored through changes
+create_before_destroy   = first create a new resource and then destroy the previous one in the case of recreation
+prevent_destroy         = marks a resource as indestructible
+```
+
 ## Using root module outputs
 
 ```bash
