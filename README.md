@@ -348,3 +348,7 @@ resource "null_resource" "app_server_provisioner" {
     }
 }
 ```
+
+To force the run of the above provisioner:
+
+`terraform taint -module mighty_trousers null_resource.app_server_provisioner`
