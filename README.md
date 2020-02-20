@@ -662,3 +662,9 @@ When you run TestKitchen, it stores the Terraform state in local `.kitchen/kitch
 To run the tests:
 
 `bundle exec kitchen test`
+
+---
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/luckylittle/terraform-playground.svg)](https://starchart.cc/luckylittle/terraform-playground)
